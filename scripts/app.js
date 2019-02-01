@@ -61,92 +61,137 @@ const checkWin = (board) => {
     };
 };
 
+const clear = state => {
+
+    state.board = [0,1,2,3,4,5,6,7,8];
+    state.winner = null;
+    state.turn = 1;
+    state.moves = 0;
+
+    board.innerHTML = `
+    <div class="row">
+        <div class="col" data-index="0"></div>
+        <div class="col" data-index="1"></div>
+        <div class="col" data-index="2"></div>
+    </div>
+    <div class="row">
+        <div class="col" data-index="3"></div>
+        <div class="col" data-index="4"></div>
+        <div class="col" data-index="5"></div>
+    </div>
+    <div class="row">
+        <div class="col" data-index="6"></div>
+        <div class="col" data-index="7"></div>
+        <div class="col" data-index="8"></div>
+    </div>
+    `;
+
+    choose.classList.remove('hidden');
+    winner.classList.add('hidden');
+    board.classList.add('hidden');
+    restart.classList.add('hidden');
+
+}
+
 //------QUERY SELECTORS
 
 const board = document.querySelector('.js-board');
 const winner = document.querySelector('.js-winner');
 const choose = document.querySelector('.js-choose');
+const restart = document.querySelector('.js-restart');
 
 //------EVENT LISTENERS
 
 choose.addEventListener('click', (e) => {
     if(e.target.classList.contains('button-X')){
-        choose.classList.add('hidden')
+        choose.classList.add('hidden');
         state.player1 = "X";
         state.player2 = "O";
-        winner.classList.remove('hidden')
-        winner.innerText = `${state.player1}'s Turn`
-        board.classList.remove('hidden')
+        winner.classList.remove('hidden');
+        winner.innerText = `${state.player1}'s Turn`;
+        board.classList.remove('hidden');
+        restart.classList.remove('hidden');
     }
     else if(e.target.classList.contains('button-O')){
-        choose.classList.add('hidden')
+        choose.classList.add('hidden');
         state.player1 = "O";
         state.player2 = "X";
-        winner.classList.remove('hidden')
-        winner.innerText = `${state.player1}'s Turn`
-        board.classList.remove('hidden')
+        winner.classList.remove('hidden');
+        winner.innerText = `${state.player1}'s Turn`;
+        board.classList.remove('hidden');
+        restart.classList.remove('hidden');
     };
 });
 
 board.addEventListener('click', (e) => {
 
-    const space = e.target.attributes['data-index'].value * 1;
-
     if(!state.winner){
-        if(typeof state.board[space] === 'number'){
 
-            if(state.turn === 1){
-                e.target.innerText = state.player1;
-                e.target.classList.add(state.player1);
-                state.board[space] = state.player1;
-                state.turn = 2;
-                state.moves+=1;
-                winner.innerText = `${state.player2}'s Turn`;
-            }
-            else if(state.turn === 2){
-                e.target.innerText = state.player2;
-                e.target.classList.add(state.player2);
-                state.board[space] = state.player2;
-                state.turn = 1;
-                state.moves+=1;
-                winner.innerText = `${state.player1}'s Turn`;
-            }
+        if(e.target.attributes['data-index']){
+            
+            const space = e.target.attributes['data-index'].value * 1;
 
-            if(state.moves >= 5 && state.moves <= 9){
-                
-                checkWin(state.board);
+            if(typeof state.board[space] === 'number'){
 
-                if(state.moves === 9 && typeof state.winner !=="string"){
-                    state.winner = "Draw!";
-                    winner.innerText = state.winner;
+                if(state.turn === 1){
+                    e.target.innerText = state.player1;
+                    e.target.classList.add(state.player1);
+                    state.board[space] = state.player1;
+                    state.turn = 2;
+                    state.moves+=1;
+                    winner.innerText = `${state.player2}'s Turn`;
+                }
+                else if(state.turn === 2){
+                    e.target.innerText = state.player2;
+                    e.target.classList.add(state.player2);
+                    state.board[space] = state.player2;
+                    state.turn = 1;
+                    state.moves+=1;
+                    winner.innerText = `${state.player1}'s Turn`;
+                }
+
+                if(state.moves >= 5 && state.moves <= 9){
+                    
+                    checkWin(state.board);
+
+                    if(state.moves === 9 && typeof state.winner !=="string"){
+                        state.winner = "Draw!";
+                        winner.innerText = state.winner;
+                    };  
                 };
-                
             };
-
         };
     };
 });
 
 board.addEventListener('mouseover', (e) => {
-    if (e.target.attributes['data-index'] && e.target.innerText === ""){
+    if(!state.winner){
+        if (e.target.attributes['data-index'] && e.target.innerText === ""){
 
-        const currentPlayer = `player${state.turn}`;
-        const classString = `${state[currentPlayer]}-H`;
+            const currentPlayer = `player${state.turn}`;
+            const classString = `${state[currentPlayer]}-H`;
 
-        e.target.classList.add(classString);
-        e.target.innerText = state[currentPlayer];
-    };
+            e.target.classList.add(classString);
+            e.target.innerText = state[currentPlayer];
+        };
+    }
 });
 
 board.addEventListener('mouseout', (e) => {
 
-    const currentPlayer = `player${state.turn}`;
-    const classString = `${state[currentPlayer]}-H`;
-    const trigger = e.target.classList.contains(classString);
-    const antiTrigger = e.target.classList.contains(state[currentPlayer]);
+    if(!state.winner){
+        const currentPlayer = `player${state.turn}`;
+        const classString = `${state[currentPlayer]}-H`;
+        const trigger = e.target.classList.contains(classString);
+        const antiTrigger = e.target.classList.contains(state[currentPlayer]);
 
-    if (e.target.attributes['data-index'] && trigger && !antiTrigger){
-        e.target.classList.remove(classString);
-        e.target.innerText = "";
-    };
+        if (e.target.attributes['data-index'] && trigger && !antiTrigger){
+            e.target.classList.remove(classString);
+            e.target.innerText = "";
+        };
+    }
+});
+
+restart.addEventListener('click', (e) => {
+    clear(state)
 });
